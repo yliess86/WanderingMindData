@@ -15,6 +15,10 @@ This implementation has been tested on `Ubuntu 20.04` with `Python 3.8`, and `to
 Install required package first `pip3 install -r requirements.txt`.
 You may use `pyenv` or `conda` to avoid confilcts with your environement.
 
+Download the [models weights](https://s3.dvic.devinci.fr/public/wmdata_weights.tar.gz) and place the `weights` folder into the project folder.
+
+> Cuda enabled GPU is needed.
+
 <span id="quickstart"></span>
 ## Quickstart
 
