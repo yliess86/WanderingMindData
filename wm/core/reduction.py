@@ -2,7 +2,7 @@ from pandas import DataFrame
 from umap import ParametricUMAP
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 COMPONENTS_PCA = 15
@@ -39,7 +39,7 @@ def reduce_umap(df: DataFrame) -> DataFrame:
     features_pca = [f"pca_feature_{f}" for f in range(COMPONENTS_PCA)]
     features_umap = [f"umap_feature_{f}" for f in range(COMPONENTS_UMAP)]
     
-    umap_pipeline = make_pipeline(StandardScaler(), ParametricUMAP(n_components=COMPONENTS_UMAP))
+    umap_pipeline = make_pipeline(MinMaxScaler(), ParametricUMAP(n_components=COMPONENTS_UMAP))
     df[features_umap] = umap_pipeline.fit_transform(df[features_pca])
 
     return df

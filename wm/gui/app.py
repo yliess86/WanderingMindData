@@ -14,11 +14,11 @@ class Config(StandardTabsWidget):
 
     def setup_widgets(self) -> None:
         """Setup Configuration Widgets"""
-        self.register_widget("root", Text(placeholder="Enter mp3 folder", description="MP3"))
-        self.register_widget("csv", Text(placeholder="Enter csv file", description="CSV"))
-        self.register_widget("pickle", Text(placeholder="Enter pickle file", description="Pickle"))
+        self.register_widget("root", Text(placeholder="Enter mp3 folder", value="mp3_trim", description="MP3"))
+        self.register_widget("csv", Text(placeholder="Enter csv file", value="aporee.csv", description="CSV"))
+        self.register_widget("pickle", Text(placeholder="Enter pickle file", value="data.pickle", description="Pickle"))
         self.register_widget("batch_size", IntSlider(value=64, min=2, max=1024, step=2, description="Batch Size"))
-        self.register_widget("jobs", IntSlider(value=4, min=1, max=12, step=1, description="Jobs"))
+        self.register_widget("jobs", IntSlider(value=1, min=1, max=12, step=1, description="Jobs"))
 
     def setup_tabs(self) -> None:
         """Setup Configuration Tabs"""
@@ -38,8 +38,8 @@ class App(StandardTabsWidget):
     def setup_widgets(self) -> None:
         """Setup Application Widgets"""
         self.register_widget("features", Button(description="Features", icon="braille"))
-        self.register_widget("reduction", Button(description="Reduction", icon="filter"), disabled=True)
-        self.register_widget("save", Button(description="Save", icon="floppy-o"), disabled=True)
+        self.register_widget("reduction", Button(description="Reduction", icon="filter", disabled=True))
+        self.register_widget("save", Button(description="Save", icon="floppy-o", disabled=True))
         self.register_widget("pbar", IntProgress(min=0, max=1, disabled=True, visible=False, description="Features"))
         
         self.w_features.on_click(lambda _: self.on_features())
@@ -70,7 +70,8 @@ class App(StandardTabsWidget):
 
         callbacks = [lambda *args, **kwargs: self.update_callback()]
         self.df = launch_features_workers(root, csv, batch_size, jobs, callbacks)
-        
+        print(self.df.head())
+
         self.w_features.disabled = True
         self.w_reduction.disabled = False
         self.w_save.disabled = False
@@ -80,9 +81,10 @@ class App(StandardTabsWidget):
 
     def on_reduction(self) -> None:
         """Button on Reduction (Performs PCA and UMAP Feature Reduction)"""
-        assert self.df and len(self.df), "[ERROR] No DataFrame available"
+        assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
         
         reduce(self.df)
+        print(self.df.head())
 
         self.w_features.disabled = True
         self.w_reduction.disabled = True
@@ -90,14 +92,10 @@ class App(StandardTabsWidget):
 
     def on_save(self) -> None:
         """Button on Save (Saves DataFrame to `pickle` file)"""
-        assert self.df and len(self.df), "[ERROR] No DataFrame available"
+        assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
 
         path = self.config.pickle()
         self.df.to_pickle(path)
-
-        self.w_features.disabled = True
-        self.w_reduction.disabled = True
-        self.w_save.disabled = False
 
     def display(self) -> None:
         """Application Display Ovewrite"""

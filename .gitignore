@@ -144,3 +144,5 @@ cython_debug/
 *.ts
 *.pt
 *.pth
+/aporee.csv
+/mp3_trim/
