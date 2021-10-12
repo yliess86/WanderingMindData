@@ -5,4 +5,4 @@ torch==1.9.0
 umap_learn==0.5.1
 ipython==7.28.0
 scikit_learn==1.0
-umap==0.1.1
+tensorflow>=2.0.0
