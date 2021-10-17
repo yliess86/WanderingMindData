@@ -23,6 +23,8 @@ WEIGHTS = "./weights"
 BYOLA_MODEL = os.path.join(WEIGHTS, "byola.pt")
 PANNS_MODEL = os.path.join(WEIGHTS, "panns.ts")
 
+AUDIO_EXTS = ["wav", "mp3", "mp4", "m4a", "flac", "aac", "wma"]
+
 
 class PrecomputedNorm(Module):
     """Precomputed Norm for Mel Spectrogram Module
@@ -147,15 +149,16 @@ def get_files(root: str, csv: str) -> List[str]:
     """Get Files from CSV
 
     Arguments:
-        root (str): mp3 root folder
-        csv (str): csv with mp3 identifiers
+        root (str): audio root folder
+        csv (str): csv with audio identifiers
 
     Returns:
-        files (List[str]): mp3 files from root selected within indentifiers
+        files (List[str]): audio files from root selected within indentifiers
     """
     df = pd.read_csv(csv)
-    path = lambda idf: os.path.join(root, f"{idf}/**/*.mp3")
-    return [f for idf in df.identifier for f in glob(path(idf), recursive=True)]
+    path = lambda idf: os.path.join(root, f"{idf}/**/*")
+    files = [f for idf in df.identifier for f in glob(path(idf), recursive=True)]
+    return list(filter(lambda f: f.split(".")[-1] in AUDIO_EXTS, files))
 
 
 @torch.no_grad()
