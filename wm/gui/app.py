@@ -17,8 +17,8 @@ class Config(StandardTabsWidget):
         self.register_widget("pca", Text(placeholder="Enter pca file", value="pca.pkl", description="PCA"))
         self.register_widget("umap", Text(placeholder="Enter umap file", value="umap.pkl", description="UMAP"))
         
-        self.register_widget("root", Text(placeholder="Enter audio folder", value="audio_trim", description="Audios"))
-        self.register_widget("csv", Text(placeholder="Enter identifier csv file", value="aporee.csv", description="Identifiers"))
+        self.register_widget("root", Text(placeholder="Enter audio folder", value="audios", description="Audios"))
+        self.register_widget("csv", Text(placeholder="Enter identifier csv file", value="audios.csv", description="Identifiers"))
         self.register_widget("data", Text(placeholder="Enter data pickle file", value="data.pkl", description="Data"))
 
         self.register_widget("batch_size", IntSlider(value=64, min=2, max=1024, step=2, description="Batch Size"))
