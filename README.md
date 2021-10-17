@@ -59,7 +59,41 @@ The final output is a `pandas` `DataFrame` containing the reference to every aud
 
 ### Data
 
-TODO: Explain Data Formatting
+This section describes the data preparation needed to make this framework usable with your data.
+
+Audio files need to be placed into a main folder `audios` (name is arbitrary).
+Each of those audio files also needs to be placed into a indetification folder `subdataset/id_01/01.mp3`.
+In this example the full path of the audio file is then `audios/subdataset/id_01/01.mp3` with `subdataset/id_01` being its identifer.
+
+```txt
+.
+├── audios
+    ├── aporee
+        ├── 01
+            └── 01.mp3
+        ├── 02
+            └── 02.wav
+        └── ...
+    └── china
+        ├── 01
+            └── 01.m4e
+        ├── 02
+            └── 02.flac
+        └── ...
+```
+
+A second requirements is the identifier file `audios.csv` (name is arbitrary).
+This file will be used to select the audios that will be fitted and/or transformed.
+
+```csv
+whatever1,identifier,whatever2
+w1_a01,aporee/01,w2_a01
+w1_a02,aporee/02,w2_a02
+...
+w1_c01,china/01,w2_c01
+w1_c02,china/02,w2_c02
+...
+```
 
 <span id="references"></span>
 ## References
