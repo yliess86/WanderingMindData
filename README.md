@@ -27,6 +27,25 @@ You first need to activate Jupyter Notebook Widgets.
 Then, start the [wm.ipynb](wm.ipynb) notebook `jupyter notebook wm.ipynb`.
 Run all the Cells and you will be granted with GUIs allowing you to configure, and launch the data pipeline.
 
+*Manual*
+```python
+from wm.core import launch_features_workers, reduce
+
+df = reduce(
+    launch_features_workers(
+        "audio_trim",          # Audio Folder
+        "audio.csv",           # CSV w/ Audio Identifiers
+        batch_size=32,         # Batch Size
+        jobs=1,                # Number of GPU to use
+    ),
+    "pca.pkl",                 # Path to Save|Load the PCA weights
+    "umap.pkl",                # Path to Save|Load the UMAP weights
+)
+
+print(df.head())               # Print the DataFrame Head (~5 Rows)
+df.to_pickle("data.pkl")       # Save the DataFrame to Pickle
+```
+
 <span id="description"></span>
 ## Description
 
@@ -36,7 +55,11 @@ They are then split into `5 sec` chunks.
 Those chunks are used to extract `2048` [BYOL-A] features.
 Those features are then reduced to `2` dimensions using a mix of [PCA] and [UMAP].
 Every chunk is labeled using [PANNs].
-The final output is a `pandas` `DataFrame` containing the reference to every audio file, their corresponding chunks, BYOL-A features (`2048`), PCA features (`15`), UMAP features (`2`), and PAANs label. 
+The final output is a `pandas` `DataFrame` containing the reference to every audio file, their corresponding chunks, BYOL-A features (`2048`), PCA features (`15`), UMAP features (`2`), and PAANs label.
+
+### Data
+
+TODO: Explain Data Formatting
 
 <span id="references"></span>
 ## References
