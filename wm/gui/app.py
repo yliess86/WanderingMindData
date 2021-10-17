@@ -14,15 +14,20 @@ class Config(StandardTabsWidget):
 
     def setup_widgets(self) -> None:
         """Setup Configuration Widgets"""
-        self.register_widget("root", Text(placeholder="Enter mp3 folder", value="mp3_trim", description="MP3"))
-        self.register_widget("csv", Text(placeholder="Enter csv file", value="aporee.csv", description="CSV"))
-        self.register_widget("pickle", Text(placeholder="Enter pickle file", value="data.pickle", description="Pickle"))
+        self.register_widget("pca", Text(placeholder="Enter pca file", value="pca.pkl", description="PCA"))
+        self.register_widget("umap", Text(placeholder="Enter umap file", value="umap.pkl", description="UMAP"))
+        
+        self.register_widget("root", Text(placeholder="Enter audio folder", value="audio_trim", description="Audios"))
+        self.register_widget("csv", Text(placeholder="Enter identifier csv file", value="aporee.csv", description="Identifiers"))
+        self.register_widget("data", Text(placeholder="Enter data pickle file", value="data.pkl", description="Data"))
+
         self.register_widget("batch_size", IntSlider(value=64, min=2, max=1024, step=2, description="Batch Size"))
         self.register_widget("jobs", IntSlider(value=1, min=1, max=12, step=1, description="Jobs"))
 
     def setup_tabs(self) -> None:
         """Setup Configuration Tabs"""
-        self.register_tab("files", 1, 3, ["root", "csv", "pickle"])
+        self.register_tab("files", 1, 2, ["pca", "umap"])
+        self.register_tab("I/O", 1, 3, ["root", "csv", "data"])
         self.register_tab("hyperparameters", 1, 2, ["batch_size", "jobs"])
 
 
@@ -83,7 +88,10 @@ class App(StandardTabsWidget):
         """Button on Reduction (Performs PCA and UMAP Feature Reduction)"""
         assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
         
-        reduce(self.df)
+        pca_path = self.pca()
+        umap_path = self.umap()
+
+        reduce(self.df, pca_path, umap_path)
         print(self.df.head())
 
         self.w_features.disabled = True
@@ -94,7 +102,7 @@ class App(StandardTabsWidget):
         """Button on Save (Saves DataFrame to `pickle` file)"""
         assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
 
-        path = self.config.pickle()
+        path = self.config.data()
         self.df.to_pickle(path)
 
     def display(self) -> None:
