@@ -1,8 +1,11 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import os
 
 from IPython.display import display
 from ipywidgets.widgets import Button, IntProgress, IntSlider, Text, VBox
-from pandas import DataFrame, read_pickle
+from pandas import DataFrame, read_csv, read_pickle
+from tqdm.auto import tqdm
 from wm.core.features import get_files, launch_features_workers
 from wm.core.reduction import reduce
 from wm.gui.standard import StandardTabsWidget
@@ -28,7 +31,7 @@ class Config(StandardTabsWidget):
 
     def setup_tabs(self) -> None:
         """Setup Configuration Tabs"""
-        self.register_tab("files", 1, 2, ["pca", "umap"])
+        self.register_tab("weights", 1, 2, ["pca", "umap"])
         self.register_tab("I/O", 1, 3, ["root", "csv", "data"])
         self.register_tab("hyperparameters", 1, 2, ["batch_size", "jobs"])
 
@@ -40,6 +43,7 @@ class App(StandardTabsWidget):
         super().__init__()
         self.config = Config()
         self.df: DataFrame = None
+        self.classes = read_csv("classes.csv")
         
         path = self.config.data()
         if os.path.isfile(path):
@@ -102,6 +106,23 @@ class App(StandardTabsWidget):
         path = self.config.data()
         self.df.to_pickle(path)
         print(f"[DataFrame] Data Saved as {path}")
+
+        print(f"[DataFrame] Plot")
+        self.plot()
+
+    def plot(self) -> None:
+        plt.style.use("dark_background")
+        plt.figure()
+        
+        pbar = tqdm(self.df.panns_label.unique(), desc="Scatter")
+        for l in pbar:
+            ldf = self.df[self.df.panns_label == l]
+            name = self.classes[self.classes.index == l].display_name.values[0]
+            plt.scatter(x=ldf.umap_feature_0, y=ldf.umap_feature_1, label=name)
+            pbar.set_postfix(label=name)
+
+        plt.legend(fancybox=True, shadow=False)
+        plt.show()
 
     def display(self) -> None:
         """Application Display Ovewrite"""

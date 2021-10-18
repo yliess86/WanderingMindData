@@ -3,6 +3,7 @@ import pickle
 
 from pandas import DataFrame
 from umap import ParametricUMAP
+from umap.parametric_umap import load_ParametricUMAP
 from sklearn.decomposition import PCA
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
@@ -30,20 +31,17 @@ def reduce_pca(df: DataFrame, path: str) -> DataFrame:
 
     scaler = StandardScaler()
     pca = PCA(n_components=COMPONENTS_PCA)
+    pipeline = make_pipeline(scaler, pca)
 
     if os.path.isfile(path):
-        with open(path, "rb") as f:
-            pca = pickle.load(path)
-
-        pipeline = make_pipeline(scaler, pca)
+        with open(path, "rb") as f: pipeline = pickle.load(f)
+        print(f"[UMAP] Loaded from {path}")
         df[features_pca] = pipeline.transform(df[features_byola])
     
     else:
-        pipeline = make_pipeline(scaler, pca)
         df[features_pca] = pipeline.fit_transform(df[features_byola])
-
-        with open(path, "wb") as f:
-            pickle.dump(pca, f)
+        with open(path, "wb") as f: pickle.dump(pipeline, f)
+        print(f"[UMAP] Saved as {path}")
 
     return df
 
@@ -67,19 +65,17 @@ def reduce_umap(df: DataFrame, path: str) -> DataFrame:
     scaler = MinMaxScaler()
     umap = ParametricUMAP(n_components=COMPONENTS_UMAP)
 
-    if os.path.isfile(path):
-        with open(path, "rb") as f:
-            umap = pickle.load(path)
-
-        pipeline = make_pipeline(scaler, umap)
-        df[features_umap] = pipeline.transform(df[features_pca])
+    if os.path.isdir(path):
+        umap = load_ParametricUMAP(path)
+        with open(os.path.join(path, "scaler.pkl"), "rb") as f: scaler = pickle.load(f)
+        print(f"[UMAP] Loaded from {path}")
+        df[features_umap] = umap.transform(scaler.transform(df[features_pca]))
 
     else:
-        pipeline = make_pipeline(scaler, umap)
-        df[features_umap] = pipeline.fit_transform(df[features_pca])
-
-        with open(path, "wb") as f:
-            pickle.dump(umap, f)
+        df[features_umap] = umap.fit_transform(scaler.fit_transform(df[features_pca]))
+        umap.save(path)
+        with open(os.path.join(path, "scaler.pkl"), "wb") as f: pickle.dump(scaler, f)
+        print(f"[UMAP] Saved as {path}")
 
     return df
 
