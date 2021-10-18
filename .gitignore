@@ -145,5 +145,14 @@ cython_debug/
 *.pt
 *.pth
 /aporee.csv
+/audios.csv
 /mp3_trim/
+/audios/
+*.mp3
+*.wav
+*.m4a
+*.flac
+*.mp4
+*.wma
+*.aac
 *.tar.gz

@@ -48,9 +48,10 @@ class PrecomputedNorm(Module):
         Returns:
             mel_spectrogram (Tensor): normalized mel spectrogram (B, C, M, T)
         """
+        eps = torch.finfo(torch.float32).eps
         mean = mel_spectrogram.mean(dim=self.axis, keepdims=True)
         std = mel_spectrogram.std(dim=self.axis, keepdims=True)
-        return (mel_spectrogram - mean) / std
+        return (mel_spectrogram - mean) / (std + eps)
 
 
 class BYOLA(Module):
@@ -195,7 +196,7 @@ def features_work(
         f_max=byola_config.mel_spectrogram.f_max,
     ).to(d)
     
-    eps = torch.finfo(torch.float16).eps
+    eps = torch.finfo(torch.float32).eps
     byola = BYOLA(d=byola_config.feature_d)
     byola.load_weights(byola_path, device("cuda"))
     byola = byola.to(d)
@@ -212,8 +213,8 @@ def features_work(
         file = files.get()
 
         wav, sr = torchaudio.load(file)
-        wav = Resample(sr, SAMPLE_RATE)(wav)
-        wav = wav.mean(0).unsqueeze(0)
+        wav = Resample(sr, SAMPLE_RATE)(wav) if sr != SAMPLE_RATE else wav
+        wav = wav.mean(0).unsqueeze(0).float()
 
         windows = Queue()
         for s in range(0, wav.size(1), HOP):

@@ -1,6 +1,8 @@
+import os
+
 from IPython.display import display
 from ipywidgets.widgets import Button, IntProgress, IntSlider, Text, VBox
-from pandas import DataFrame
+from pandas import DataFrame, read_pickle
 from wm.core.features import get_files, launch_features_workers
 from wm.core.reduction import reduce
 from wm.gui.standard import StandardTabsWidget
@@ -37,23 +39,26 @@ class App(StandardTabsWidget):
     def __init__(self) -> None:
         super().__init__()
         self.config = Config()
-        
         self.df: DataFrame = None
+        
+        path = self.config.data()
+        if os.path.isfile(path):
+            self.df = read_pickle(path)
+            print(f"[DataFrame] Loaded from {path}")
+            print(self.df.head())
 
     def setup_widgets(self) -> None:
         """Setup Application Widgets"""
         self.register_widget("features", Button(description="Features", icon="braille"))
-        self.register_widget("reduction", Button(description="Reduction", icon="filter", disabled=True))
-        self.register_widget("save", Button(description="Save", icon="floppy-o", disabled=True))
+        self.register_widget("reduction", Button(description="Reduction", icon="filter"))
         self.register_widget("pbar", IntProgress(min=0, max=1, disabled=True, visible=False, description="Features"))
         
         self.w_features.on_click(lambda _: self.on_features())
         self.w_reduction.on_click(lambda _: self.on_reduction())
-        self.w_save.on_click(lambda _: self.on_save())
 
     def setup_tabs(self) -> None:
         """Setup Application Tabs"""
-        self.register_tab("actions", 1, 3, ["features", "reduction", "save"])
+        self.register_tab("actions", 1, 2, ["features", "reduction"])
 
     def update_callback(self) -> None:
         """Update ProgressBar"""
@@ -77,9 +82,9 @@ class App(StandardTabsWidget):
         self.df = launch_features_workers(root, csv, batch_size, jobs, callbacks)
         print(self.df.head())
 
-        self.w_features.disabled = True
-        self.w_reduction.disabled = False
-        self.w_save.disabled = False
+        path = self.config.data()
+        self.df.to_pickle(path)
+        print(f"[DataFrame] Data Saved as {path}")
 
         self.w_pbar.disabled = True
         self.w_pbar.visible = False
@@ -88,22 +93,15 @@ class App(StandardTabsWidget):
         """Button on Reduction (Performs PCA and UMAP Feature Reduction)"""
         assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
         
-        pca_path = self.pca()
-        umap_path = self.umap()
+        pca_path = self.config.pca()
+        umap_path = self.config.umap()
 
         reduce(self.df, pca_path, umap_path)
         print(self.df.head())
 
-        self.w_features.disabled = True
-        self.w_reduction.disabled = True
-        self.w_save.disabled = False
-
-    def on_save(self) -> None:
-        """Button on Save (Saves DataFrame to `pickle` file)"""
-        assert self.df is not None and len(self.df), "[ERROR] No DataFrame available"
-
         path = self.config.data()
         self.df.to_pickle(path)
+        print(f"[DataFrame] Data Saved as {path}")
 
     def display(self) -> None:
         """Application Display Ovewrite"""
